@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanWrapper;
@@ -27,6 +26,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -51,6 +51,8 @@ public class ReloadingPropertyPlaceholderConfigurer extends DefaultPropertyPlace
 
     private BeanFactory beanFactory;
     private Properties[] propertiesArray;
+    private PropertyPlaceholderHelper helper;
+
 
     /**
      * 对于被标记为动态的，进行 构造 property dependency
@@ -94,7 +96,8 @@ public class ReloadingPropertyPlaceholderConfigurer extends DefaultPropertyPlace
             }
         }
         // then, business as usual. no recursive reloading placeholders please.
-        return super.parseStringValue(buf.toString(), props, visitedPlaceholders);
+        
+    return helper.replacePlaceholders(buf.toString(), props);
     }
 
     /**
@@ -410,6 +413,8 @@ public class ReloadingPropertyPlaceholderConfigurer extends DefaultPropertyPlace
                 ((ReloadableProperties) properties).addReloadablePropertiesListener(this);
             }
         }
+        helper = new PropertyPlaceholderHelper(placeholderPrefix,
+            placeholderSuffix, beanName, ignoreUnresolvablePlaceholders);
     }
 
     /**
